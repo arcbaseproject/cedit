@@ -1,0 +1,20 @@
+pkgbase = cedit-git
+	pkgdesc = Small terminal text editor with nano keys, Emacs keys and language-server support (git main)
+	pkgver = 1.0.0.r0.g94f9970
+	pkgrel = 1
+	url = https://github.com/arcbaseproject/cedit
+	arch = x86_64
+	arch = aarch64
+	license = GPL-3.0-or-later
+	makedepends = git
+	depends = glibc
+	optdepends = clang: C/C++ language server (clangd)
+	optdepends = rust-analyzer: Rust language server
+	optdepends = gopls: Go language server
+	optdepends = python-lsp-server: Python language server
+	provides = cedit
+	conflicts = cedit
+	source = cedit::git+https://github.com/arcbaseproject/cedit.git
+	sha256sums = SKIP
+
+pkgname = cedit-git

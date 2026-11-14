@@ -12,7 +12,7 @@ optdepends=('clang: C/C++ language server (clangd)'
             'gopls: Go language server'
             'python-lsp-server: Python language server')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('7e5782f469a5f63589524bc96db736cb582303b2bdd842ed632d9091ba6d9c58')
 
 build() {
   cd "$pkgname-$pkgver"

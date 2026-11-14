@@ -1,6 +1,6 @@
 # Maintainer: arcbaseproject
 pkgname=cedit-git
-pkgver=1.0.0.r0.g0000000
+pkgver=1.0.0.r0.g94f9970
 pkgrel=1
 pkgdesc='Small terminal text editor with nano keys, Emacs keys and language-server support (git main)'
 arch=('x86_64' 'aarch64')

@@ -82,6 +82,13 @@ Pass options after `sh -s --`, for example
 Auto-update runs whatever lands on the `main` branch of this repository.
 Use `--no-auto-update` if you want to review changes before you upgrade.
 
+### Arch Linux (AUR)
+
+```sh
+yay -S cedit        # latest release
+yay -S cedit-git    # main branch
+```
+
 ### From source
 
 You need a C17 compiler (GCC or Clang), GNU make and Linux or another
