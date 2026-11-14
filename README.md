@@ -15,6 +15,10 @@
   <a href="#performance">Performance</a>
 </p>
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Cedit editing a C file: search, auto-pairing, clangd completion and an error underline" width="760">
+</p>
+
 ---
 
 Cedit is an independent project with no connection to the GNU Project.
