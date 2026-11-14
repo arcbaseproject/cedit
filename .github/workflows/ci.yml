@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: ${{ matrix.cc }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    env:
+      CC: ${{ matrix.cc }}
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (warnings fail the job)
+        run: |
+          make -j"$(nproc)" 2>&1 | tee build.log
+          ! grep -q "warning:" build.log
+
+      - name: Unit tests
+        run: make test
+
+      - name: Unit tests under ASan + UBSan
+        run: make test-asan
+
+      - name: End-to-end tests (pty)
+        run: python3 tests/pty_test.py ./cedit
+
+      - name: End-to-end tests under ASan + UBSan
+        run: |
+          make asan
+          python3 tests/pty_test.py ./build/asan/cedit
+
+      - name: Installer (local source, no timer)
+        run: |
+          CEDIT_SOURCE_DIR=. sh install.sh --prefix "$RUNNER_TEMP/p" --no-auto-update
+          "$RUNNER_TEMP/p/bin/cedit" --version
+          sh "$RUNNER_TEMP/p/bin/cedit-update" --uninstall --prefix "$RUNNER_TEMP/p"
+
+  lua:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y liblua5.4-dev
+      - name: Build and test with Lua
+        run: |
+          make LUA=1 LUA_PC=lua5.4 BUILD=debug 2>&1 | tee build.log
+          ! grep -q "warning:" build.log
+          make LUA=1 LUA_PC=lua5.4 BUILD=debug test
+          ./build/debug-lua/cedit --version | grep -q "Lua scripting: yes"
+
+  fuzz:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fuzz each target for 60 s
+        run: |
+          make fuzz
+          for t in input text json; do
+            mkdir -p "corpus-$t"
+            "build/fuzz/fuzz_$t" -max_total_time=60 "corpus-$t"
+          done

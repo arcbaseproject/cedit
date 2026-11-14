@@ -195,10 +195,16 @@ fi
 mkdir -p "$BIN" 2>/dev/null || die "cannot create $BIN (try sudo, or --prefix)"
 [ -w "$BIN" ] || die "cannot write to $BIN (try sudo, or --prefix)"
 make -C "$SRC" PREFIX="$PREFIX" install >/dev/null
-install -m 755 "$SRC/install.sh" "$BIN/cedit-update"
+# This script may be running as cedit-update: replace it by rename so
+# the shell keeps reading the old file instead of the new bytes.
+install -m 755 "$SRC/install.sh" "$BIN/.cedit-update.new"
+mv -f "$BIN/.cedit-update.new" "$BIN/cedit-update"
 
+if [ "$MODE" = check ]; then
+    echo "installed $(installed_version)"
+    exit 0
+fi
 say "Installed cedit $(installed_version) to $BIN/cedit"
-[ "$MODE" = check ] && exit 0
 
 if [ "$AUTO_UPDATE" -eq 1 ]; then install_timer; else remove_timer; fi
 case ":$PATH:" in
