@@ -1,0 +1,38 @@
+# Maintainer: arcbaseproject
+pkgname=cedit-git
+pkgver=1.0.0.r0.g0000000
+pkgrel=1
+pkgdesc='Small terminal text editor with nano keys, Emacs keys and language-server support (git main)'
+arch=('x86_64' 'aarch64')
+url='https://github.com/arcbaseproject/cedit'
+license=('GPL-3.0-or-later')
+depends=('glibc')
+makedepends=('git')
+optdepends=('clang: C/C++ language server (clangd)'
+            'rust-analyzer: Rust language server'
+            'gopls: Go language server'
+            'python-lsp-server: Python language server')
+provides=('cedit')
+conflicts=('cedit')
+source=("cedit::git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd cedit
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd cedit
+  make
+}
+
+check() {
+  cd cedit
+  make test
+}
+
+package() {
+  cd cedit
+  make PREFIX=/usr DESTDIR="$pkgdir" install
+}
