@@ -1,0 +1,19 @@
+# Example cedit configuration: copy to ~/.config/cedit/config
+#
+# The keymap directive resets bindings, so keep it first.
+keymap nano
+
+tab-width 4
+expand-tabs yes
+auto-indent yes
+line-numbers absolute
+
+theme dark
+colors auto
+# face SLOT FG [BG] [bold] [italic] [underline] [reverse]
+face comment #6a9955 - italic
+face selection - #264f78
+
+# Extra bindings
+bind C-c l toggle-line-numbers
+bind C-c r revert-buffer

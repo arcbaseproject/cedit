@@ -1,0 +1,5 @@
+-std=c17
+-Iinclude
+-D_XOPEN_SOURCE=700
+-Wall
+-Wextra

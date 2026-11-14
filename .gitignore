@@ -1,0 +1,10 @@
+build/
+/cedit
+*.o
+*.d
+*.save
+*.save.[0-9]*
+.*.cedit-*
+crash-*
+leak-*
+timeout-*

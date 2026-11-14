@@ -1,0 +1,145 @@
+.TH CEDIT 1 "November 2026" "cedit 1.0.0" "User Commands"
+.SH NAME
+cedit \- lightweight Emacs-inspired terminal text editor
+.SH SYNOPSIS
+.B cedit
+[\fIOPTION\fR]... [\fB+\fILINE\fR[\fB:\fICOL\fR]] [\fIFILE\fR]...
+.SH DESCRIPTION
+.B cedit
+is a full-screen terminal text editor with Emacs-style key sequences,
+UTF-8 support, syntax highlighting, multiple buffers, undo/redo,
+incremental and regular-expression search, and atomic file saving.
+Files that do not exist are created when first saved.
+.PP
+"GNU Cedit" is a working name; this program is not an official GNU
+package.
+.SH OPTIONS
+.TP
+.BR \-e ", " \-\-emacs
+Use the Emacs keymap (C-x C-s save, C-x C-c quit, ...).
+.TP
+.BR \-s ", " \-\-simple
+Use the simple keymap (Ctrl+S save, Ctrl+Q quit, Ctrl+Z undo, ...).
+.TP
+.BR \-n ", " \-\-no\-config
+Do not read the configuration file or load any Lua scripts.
+.TP
+.B \-\-no\-plugins
+Do not load scripts from the plugins directory.
+.TP
+.BI + LINE [: COL ]
+Place the cursor at \fILINE\fR (and \fICOL\fR) in the next file.
+.TP
+.BR \-h ", " \-\-help
+Show usage and exit.
+.TP
+.BR \-V ", " \-\-version
+Show the version and whether Lua scripting is compiled in.
+.SH KEYS
+The default keymap follows GNU nano. ^X means Control-X; M-X means Alt-X
+(or Escape followed by X). \fB^G\fR lists every active binding.
+.TP
+.B ^O\fR, \fB^S
+Save.
+.TP
+.B ^X
+Exit, offering to save modified buffers.
+.TP
+.B ^R
+Open a file in a new buffer (TAB completes).
+.TP
+.B ^W\fR, \fB^Q\fR, \fBM-W\fR, \fBM-Q
+Search forward, backward; next, previous match.
+.TP
+.B ^\e\fR, \fBM-R
+Replace.
+.TP
+.B ^K\fR, \fBM-6\fR, \fB^U
+Cut line or selection (repeat to append), copy, paste (\fB^U\fR).
+.TP
+.B ^6\fR, \fBM-A
+Set mark. Shift+movement also selects.
+.TP
+.B M-U\fR, \fBM-E
+Undo, redo.
+.TP
+.B ^_\fR, \fBM-G
+Go to line[:column].
+.TP
+.B ^C
+Show cursor position. In prompts, cancel.
+.TP
+.B M-\e\fR, \fBM-/
+First, last line.
+.TP
+.B M-<\fR, \fBM->
+Previous, next buffer.
+.TP
+.B ^]\fR, \fBM-.\fR, \fBM-,\fR, \fBM-H
+Language server: complete, go to definition, go back, hover.
+.TP
+.B ^T
+Run a command by name.
+.PP
+With \fB\-\-emacs\fR: C-x C-s save, C-x C-c quit, C-x C-f open, C-g
+cancel, C-s/C-r search, C-k/C-y kill/yank, C-SPC mark, C-_ undo, M-x
+commands, M-/ completion. With \fB\-\-simple\fR: Ctrl+S, Ctrl+Q,
+Ctrl+O, Ctrl+Z/Y, Ctrl+X/C/V, Ctrl+F, Ctrl+P.
+.SH FILES
+.TP
+.I ~/.config/cedit/config
+Configuration file (see \fBCONFIGURATION\fR). Honors \fB$XDG_CONFIG_HOME\fR.
+.TP
+.I ~/.config/cedit/init.lua\fR, \fI~/.config/cedit/plugins/*.lua
+Lua scripts (only in builds with Lua). They must be owned by the user
+and not group- or world-writable. Scripts are \fBnot sandboxed\fR.
+.TP
+.I ~/.local/state/cedit/recent
+Recent-file history. Honors \fB$XDG_STATE_HOME\fR.
+.TP
+.IB FILE .save
+Emergency copy written when the editor is terminated by a signal or runs
+out of memory with unsaved changes.
+.SH CONFIGURATION
+One directive per line; \fB#\fR starts a comment line.
+.PP
+.nf
+keymap nano|emacs|simple
+tab-width 1-16
+expand-tabs yes|no
+auto-indent yes|no
+auto-pair yes|no
+lsp on|off
+lsp LANG off
+lsp LANG COMMAND [ARGS...]
+line-numbers off|absolute|relative
+theme dark|light|mono
+colors auto|16|256|truecolor
+face SLOT FG [BG] [bold] [italic] [underline] [reverse]
+bind KEY... COMMAND
+unbind KEY...
+.fi
+.SH SAFETY
+Files are saved by writing a temporary file in the same directory,
+syncing it to disk and renaming it over the original, so a failed save
+never truncates the existing file. Permissions are preserved and
+symbolic links are followed. Files with multiple hard links or owned by
+another user are rewritten in place. Control characters and escape
+sequences in files and filenames are displayed as visible text and never
+sent to the terminal.
+.SH LANGUAGE SERVERS
+When a file is opened, the matching language server (clangd,
+rust-analyzer, gopls, pylsp, bash-language-server,
+typescript-language-server, vscode-json-language-server, taplo, marksman)
+is started if it is installed. Servers are run without a shell. Some
+servers execute project code (rust-analyzer runs build scripts); use
+\fBlsp off\fR before opening untrusted projects.
+.SH EXIT STATUS
+0 on normal exit; 1 on startup errors; 2 on invalid options; 128+N when
+terminated by signal N.
+.SH SEE ALSO
+.BR emacs (1),
+.BR nano (1),
+.BR vim (1)
+.PP
+Full documentation: README.md and docs/ in the source distribution.
