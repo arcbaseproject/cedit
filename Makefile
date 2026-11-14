@@ -10,7 +10,7 @@
 #   make install          PREFIX=/usr/local DESTDIR=
 #   make LUA=1            enable Lua scripting (LUA_PC=lua5.4 to pick a version)
 
-VERSION   := 1.0.0
+VERSION   := $(shell cat VERSION)
 PREFIX    ?= /usr/local
 BINDIR    ?= $(PREFIX)/bin
 MANDIR    ?= $(PREFIX)/share/man
