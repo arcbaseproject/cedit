@@ -1,0 +1,20 @@
+Source: cedit
+Section: editors
+Priority: optional
+Maintainer: arcbaseproject <arcbaseproject@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://github.com/arcbaseproject/cedit
+Vcs-Git: https://github.com/arcbaseproject/cedit.git
+Vcs-Browser: https://github.com/arcbaseproject/cedit
+Rules-Requires-Root: no
+
+Package: cedit
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: clangd
+Description: small terminal text editor with nano keys
+ Cedit is a terminal text editor written in C. It uses nano keys by
+ default and offers Emacs and Ctrl+S/Ctrl+Q key layouts. It handles
+ large files, saves atomically, highlights eleven languages and talks
+ to language servers for diagnostics and completion.

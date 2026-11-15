@@ -9,7 +9,7 @@
 #include "cedit/script.h"
 
 #ifndef CEDIT_VERSION
-#define CEDIT_VERSION "1.0.0"
+#define CEDIT_VERSION "1.0.1"
 #endif
 
 static void usage(FILE *out) {
