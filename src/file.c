@@ -24,7 +24,11 @@ static void fill_stamp(const struct stat *st, FileStamp *stamp) {
     stamp->dev = st->st_dev;
     stamp->ino = st->st_ino;
     stamp->size = st->st_size;
+#ifdef __APPLE__
+    stamp->mtime = st->st_mtimespec;
+#else
     stamp->mtime = st->st_mtim;
+#endif
 }
 
 int file_stamp(const char *path, FileStamp *stamp) {

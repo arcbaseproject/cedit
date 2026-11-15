@@ -20,10 +20,10 @@ static int test_failures, test_checks;
     do {                                                                    \
         const char *a_ = (a), *b_ = (b);                                    \
         test_checks++;                                                      \
-        if (strcmp(a_, b_) != 0) {                                          \
+        if (!a_ || !b_ || strcmp(a_, b_) != 0) {                            \
             test_failures++;                                                \
             fprintf(stderr, "%s:%d: \"%s\" != \"%s\"\n", __FILE__, __LINE__, \
-                    a_, b_);                                                \
+                    a_ ? a_ : "(null)", b_ ? b_ : "(null)");                \
         }                                                                   \
     } while (0)
 

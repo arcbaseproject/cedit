@@ -28,6 +28,9 @@ CPPFLAGS  += -Iinclude -D_XOPEN_SOURCE=700 -DCEDIT_VERSION='"$(VERSION)"'
 CFLAGS    ?=
 CFLAGS    += -std=c17 $(WARN)
 LDLIBS    :=
+ifeq ($(shell uname -s),Darwin)
+  CPPFLAGS += -D_DARWIN_C_SOURCE
+endif
 
 ifeq ($(BUILD),release)
   CFLAGS   += -O2 -fstack-protector-strong
@@ -110,11 +113,11 @@ fuzz:
 	@echo "     build/fuzz/fuzz_json  -max_total_time=60"
 
 install: cedit
-	install -Dm755 cedit $(DESTDIR)$(BINDIR)/cedit
-	install -Dm644 docs/cedit.1 $(DESTDIR)$(MANDIR)/man1/cedit.1
-	install -Dm644 README.md $(DESTDIR)$(DOCDIR)/README.md
-	install -Dm644 examples/config $(DESTDIR)$(DOCDIR)/examples/config
-	install -Dm644 examples/init.lua $(DESTDIR)$(DOCDIR)/examples/init.lua
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(DOCDIR)/examples
+	install -m755 cedit $(DESTDIR)$(BINDIR)/cedit
+	install -m644 docs/cedit.1 $(DESTDIR)$(MANDIR)/man1/cedit.1
+	install -m644 README.md $(DESTDIR)$(DOCDIR)/README.md
+	install -m644 examples/config examples/init.lua $(DESTDIR)$(DOCDIR)/examples/
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/cedit $(DESTDIR)$(MANDIR)/man1/cedit.1

@@ -60,6 +60,10 @@ jobs:
           ! grep -q "warning:" build.log
       - run: make test
       - run: python3 tests/pty_test.py ./cedit
+      - name: Install with BSD install(1)
+        run: |
+          make PREFIX="$RUNNER_TEMP/p" install
+          "$RUNNER_TEMP/p/bin/cedit" --version
 
   lua:
     runs-on: ubuntu-24.04

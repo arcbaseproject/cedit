@@ -465,16 +465,16 @@ static void test_json(void) {
 
 static void test_keymap_config(void) {
     Editor *e = editor_new(true);
-    const char *c0;
-    const Keymap *s0;
+    const char *c0 = NULL;
+    const Keymap *s0 = NULL;
     CHECK(keymap_lookup(e->keymap, 15, &c0, &s0) == KM_COMMAND); /* nano default */
     CHECK_STR(c0, "save-buffer");
     CHECK(keymap_lookup(e->keymap, 24, &c0, &s0) == KM_COMMAND);
     CHECK_STR(c0, "save-buffers-kill-editor");
     e->cfg.keymap = KEYMAP_EMACS;
     editor_reset_keymap(e);
-    const char *cmd;
-    const Keymap *sub;
+    const char *cmd = NULL;
+    const Keymap *sub = NULL;
     CHECK(keymap_lookup(e->keymap, 24, &cmd, &sub) == KM_PREFIX);
     CHECK(keymap_lookup(sub, 19, &cmd, &sub) == KM_COMMAND);
     CHECK_STR(cmd, "save-buffer");
