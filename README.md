@@ -82,11 +82,21 @@ Pass options after `sh -s --`, for example
 Auto-update runs whatever lands on the `main` branch of this repository.
 Use `--no-auto-update` if you want to review changes before you upgrade.
 
-### Arch Linux (AUR)
+### Arch Linux
+
+The PKGBUILDs live in [`packaging/aur`](packaging/aur) until the AUR
+reopens registration:
 
 ```sh
-yay -S cedit        # latest release
-yay -S cedit-git    # main branch
+git clone https://github.com/arcbaseproject/cedit
+cd cedit/packaging/aur/cedit && makepkg -si     # or cedit-git for main
+```
+
+### Nix
+
+```sh
+nix run github:arcbaseproject/cedit -- notes.txt
+nix profile install github:arcbaseproject/cedit
 ```
 
 ### From source
