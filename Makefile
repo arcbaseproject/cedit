@@ -31,7 +31,7 @@ LDLIBS    :=
 
 ifeq ($(BUILD),release)
   CFLAGS   += -O2 -fstack-protector-strong
-  CPPFLAGS += -DNDEBUG -D_FORTIFY_SOURCE=3
+  CPPFLAGS += -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
 else ifeq ($(BUILD),debug)
   CFLAGS   += -O0 -g3
 else ifeq ($(BUILD),asan)

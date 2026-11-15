@@ -47,6 +47,20 @@ jobs:
           "$RUNNER_TEMP/p/bin/cedit" --version
           sh "$RUNNER_TEMP/p/bin/cedit-update" --uninstall --prefix "$RUNNER_TEMP/p"
 
+  macos:
+    runs-on: macos-latest
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (warnings fail the job)
+        run: |
+          make -j"$(sysctl -n hw.ncpu)" 2>&1 | tee build.log
+          ! grep -q "warning:" build.log
+      - run: make test
+      - run: python3 tests/pty_test.py ./cedit
+
   lua:
     runs-on: ubuntu-24.04
     steps:
