@@ -1,0 +1,26 @@
+# Maintainer: arcbaseproject <arcbaseproject@users.noreply.github.com>
+pkgname=cedit
+pkgver=1.0.1
+pkgrel=0
+pkgdesc="Small terminal text editor with nano keys and language-server support"
+url="https://github.com/arcbaseproject/cedit"
+arch="all"
+license="GPL-3.0-or-later"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/arcbaseproject/cedit/archive/refs/tags/v$pkgver.tar.gz"
+
+build() {
+	make
+}
+
+check() {
+	make test
+}
+
+package() {
+	make PREFIX=/usr DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+8dd538983553b1c1666f9a49eb283e9be87801c5370d5615edf6aa84348eed0e9808eb8bad2a4cc18d0cf748189d58394d7f1657ab741d7107a84ba0a759e475  $pkgname-$pkgver.tar.gz
+"

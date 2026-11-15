@@ -82,6 +82,12 @@ Pass options after `sh -s --`, for example
 Auto-update runs whatever lands on the `main` branch of this repository.
 Use `--no-auto-update` if you want to review changes before you upgrade.
 
+### Homebrew (macOS and Linux)
+
+```sh
+brew install arcbaseproject/tap/cedit
+```
+
 ### Arch Linux
 
 The PKGBUILDs live in [`packaging/aur`](packaging/aur) until the AUR

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person" proxied="no">
+		<email>arcbaseproject@users.noreply.github.com</email>
+		<name>arcbaseproject</name>
+	</maintainer>
+	<upstream>
+		<remote-id type="github">arcbaseproject/cedit</remote-id>
+		<bugs-to>https://github.com/arcbaseproject/cedit/issues</bugs-to>
+	</upstream>
+	<use>
+		<flag name="lua">Enable Lua plugins via <pkg>dev-lang/lua</pkg></flag>
+	</use>
+</pkgmetadata>
