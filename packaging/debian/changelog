@@ -1,3 +1,9 @@
+cedit (1.1.0-1) unstable; urgency=medium
+
+  * New upstream release: file tree, mouse support, right-click menu.
+
+ -- arcbaseproject <arcbaseproject@users.noreply.github.com>  Tue, 17 Nov 2026 22:00:00 -0600
+
 cedit (1.0.1-1) unstable; urgency=medium
 
   * Initial release.

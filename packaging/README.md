@@ -1,7 +1,7 @@
 # Packaging
 
 Each directory builds the tagged release and runs `make test`. All were
-built and installed in a clean container or VM for 1.0.1.
+built and installed in a clean container or VM for 1.0.1 (1.1.0 checksums updated, not rebuilt yet).
 
 | Directory | Target | Status |
 |-----------|--------|--------|

@@ -1,5 +1,5 @@
 Name:           cedit
-Version:        1.0.1
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Small terminal text editor with nano keys and language-server support
 License:        GPL-3.0-or-later
@@ -35,6 +35,9 @@ make test
 %{_pkgdocdir}/
 
 %changelog
+* Tue Nov 17 2026 arcbaseproject - 1.1.0-1
+- Update to 1.1.0: file tree, mouse support, right-click menu
+
 * Sat Nov 14 2026 arcbaseproject - 1.0.1-1
 - Update to 1.0.1
 

@@ -1,6 +1,6 @@
 # Maintainer: arcbaseproject <arcbaseproject@users.noreply.github.com>
 pkgname=cedit
-pkgver=1.0.1
+pkgver=1.1.0
 pkgrel=0
 pkgdesc="Small terminal text editor with nano keys and language-server support"
 url="https://github.com/arcbaseproject/cedit"
@@ -22,5 +22,5 @@ package() {
 }
 
 sha512sums="
-8dd538983553b1c1666f9a49eb283e9be87801c5370d5615edf6aa84348eed0e9808eb8bad2a4cc18d0cf748189d58394d7f1657ab741d7107a84ba0a759e475  $pkgname-$pkgver.tar.gz
+974c9cb19506cf00d692868929072d4163d194f16061b8a697605d08ffa6a906716556cb6125230091915d38a23fcfb1be5cc37ca974d581152e55d3c44046da  $pkgname-$pkgver.tar.gz
 "

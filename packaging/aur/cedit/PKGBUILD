@@ -1,6 +1,6 @@
 # Maintainer: arcbaseproject
 pkgname=cedit
-pkgver=1.0.1
+pkgver=1.1.0
 pkgrel=1
 pkgdesc='Small terminal text editor with nano keys, Emacs keys and language-server support'
 arch=('x86_64' 'aarch64')
@@ -12,7 +12,7 @@ optdepends=('clang: C/C++ language server (clangd)'
             'gopls: Go language server'
             'python-lsp-server: Python language server')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('210831125888213e38b2e6e3c816f833258068cc3d13a5120cf6c86d40427553')
+sha256sums=('da20f639300efa42b9c8cf652151f59a96e595e7bb970163f5928342c7176d18')
 
 build() {
   cd "$pkgname-$pkgver"
