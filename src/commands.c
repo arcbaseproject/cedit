@@ -725,6 +725,7 @@ void commands_register_edit(Editor *e) {
 void commands_init(Editor *e) {
     commands_register_edit(e);
     commands_register_file(e);
+    tree_register_commands(e);
     commands_register_search(e);
     lsp_register_commands(e);
 }
@@ -750,6 +751,7 @@ static const char *const common_keys[][2] = {
     {"M-x", "execute-extended-command"},
     {"M-/", "lsp-complete"},           {"M-TAB", "lsp-complete"},
     {"M-.", "lsp-definition"},         {"M-,", "lsp-back"},
+    {"M-t", "file-tree"},
 };
 
 static const char *const emacs_keys[][2] = {

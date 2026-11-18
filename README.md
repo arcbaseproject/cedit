@@ -47,7 +47,8 @@ The name is a working title.
   JavaScript, JSON, TOML, Markdown and Makefiles.
 - **Editing tools.** Undo and redo, selections, incremental and regex
   search, query-replace, auto-indent, bracket and quote pairing, several
-  open buffers and a recent-files list.
+  open buffers, a recent-files list, a file tree sidebar and mouse
+  support (click, drag-select, wheel, right-click menu).
 - **Three keymaps.** Nano (default), Emacs or simple Ctrl+S/Ctrl+Q. You
   can rebind any key in a config file.
 - **Lua plugins** if you build with `make LUA=1`.
@@ -160,6 +161,7 @@ Name a file that doesn't exist and Cedit creates it when you save. Press
 | `M-<` / `M->` | previous / next buffer |
 | `^]` | complete with the language server |
 | `M-.` / `M-,` | go to definition / come back |
+| `M-T` | file tree sidebar |
 | `M-H` | hover info |
 | `^T` | run a command by name |
 | `^G` | help |

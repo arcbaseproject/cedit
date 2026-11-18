@@ -46,6 +46,7 @@ Modelled on GNU nano. `^X` means Ctrl+X, `M-X` means Alt+X (or Esc, X).
 | `^Z` | suspend | |
 | `^]` | complete (language server) | `lsp-complete` |
 | `M-.` / `M-,` | go to definition / back | |
+| `M-T` | file tree sidebar | `file-tree` |
 | `M-H` | hover info | `lsp-hover` |
 | `M-N` / `M-P` | next / previous diagnostic | |
 | `Esc` | cancel selection or search highlight | `keyboard-quit` |
@@ -75,6 +76,41 @@ changes, the same as in nano.
 | `M-x` | `execute-extended-command` |
 | `M-/`, `M-TAB` | `lsp-complete` |
 | `M-.` / `M-,` | `lsp-definition` / `lsp-back` |
+| `M-t` | `file-tree` (show and focus the sidebar; again: hide) |
+
+### File tree
+
+`M-t` opens a sidebar listing the working directory and moves focus into
+it. Dotfiles are hidden. While it has focus:
+
+| Key | Action |
+|-----|--------|
+| up / down, `C-p` / `C-n` | move |
+| `RET` | open the file, or fold/unfold the folder |
+| right / left | unfold / fold, or jump to the parent folder |
+| `Esc`, `C-g`, `TAB` | back to the text (the tree stays) |
+| `q`, `M-t` | hide the tree |
+
+Any other key returns focus to the text and runs as usual.
+
+## Mouse
+
+| Action | Effect |
+|--------|--------|
+| click in the text | move the cursor there |
+| drag | select (typing replaces the selection, like Shift+arrows) |
+| wheel | scroll three lines; the cursor stays on screen |
+| click in the file tree | open the file, or fold/unfold the folder |
+| click / wheel on the completion popup | accept an item / move the selection |
+| right-click | menu: Cut and Copy (on a selection), Paste, Select all, Undo |
+
+In the right-click menu, click an item or use up/down and `RET`; `Esc`
+or a click elsewhere closes it. Right-clicking outside the selection
+moves the cursor there first.
+
+While cedit has the mouse, your terminal's own select, copy and
+middle-click paste need Shift held. `mouse no` in the config turns
+mouse handling off.
 
 ## Emacs keymap (`--emacs` or `keymap emacs`)
 

@@ -776,6 +776,88 @@ static void test_nano_keys(void) {
     editor_free(e);
 }
 
+static void test_tree(void) {
+    char root[300];
+    snprintf(root, sizeof root, "%s", tmp_path("tree"));
+    CHECK(mkdir(root, 0700) == 0);
+    CHECK(mkdir(tmp_path("tree/sub"), 0700) == 0);
+    write_raw(tmp_path("tree/b.txt"), "hello\n");
+    write_raw(tmp_path("tree/sub/a.c"), "x\n");
+    write_raw(tmp_path("tree/.hidden"), "");
+    Editor *e = editor_new(true);
+    editor_add_buffer(e, buffer_new("scratch"));
+    command_run(e, "file-tree"); /* lists the cwd; reload our dir below */
+    CHECK(e->tree_visible && !e->tree_focus && tree_width(e) == 30);
+    tree_load(e, root);
+    CHECK(e->tree_n == 2 && e->tree[0].dir); /* dirs first, no dotfiles */
+    CHECK(tree_key(e, KEY_RIGHT) && e->tree_n == 3 && e->tree[1].depth == 1);
+    CHECK(tree_key(e, KEY_DOWN) && e->tree_sel == 1);
+    CHECK(tree_key(e, KEY_LEFT) && e->tree_sel == 0); /* to parent */
+    CHECK(tree_key(e, KEY_LEFT) && e->tree_n == 2);   /* fold */
+    CHECK(!tree_key(e, 'x'));
+    e->tree_focus = true;
+    CHECK(tree_key(e, KEY_END) && tree_key(e, KEY_RET));
+    CHECK(!e->tree_focus && strcmp(editor_buf(e)->name, "b.txt") == 0);
+    render_frame(e);
+    CHECK(strstr(str_cstr(&e->frame), "sub/") != NULL);
+    CHECK(tree_key(e, 'q') && !e->tree_visible && tree_width(e) == 0);
+    editor_free(e);
+}
+
+static void mouse_at(Editor *e, int button, int x, int y, bool drag) {
+    e->mouse = (Mouse){button, x, y, false, drag};
+    editor_handle_key(e, KEY_MOUSE);
+}
+
+static void test_mouse(void) {
+    const char *seq = "\x1b[<0;12;3M";
+    Key k;
+    Mouse m;
+    CHECK(input_parse((const unsigned char *)seq, strlen(seq), false, &k) ==
+              strlen(seq) && k == KEY_MOUSE);
+    CHECK(input_mouse((const unsigned char *)seq, strlen(seq), &m));
+    CHECK(m.button == 0 && m.x == 11 && m.y == 2 && !m.release && !m.drag);
+    seq = "\x1b[<32;1;1m"; /* motion bit, release */
+    CHECK(input_mouse((const unsigned char *)seq, strlen(seq), &m));
+    CHECK(m.drag && m.release && m.button == 0);
+    seq = "\x1b[<0;0;1M"; /* columns start at 1 */
+    CHECK(!input_mouse((const unsigned char *)seq, strlen(seq), &m));
+    seq = "\x1b[<0;1"; /* incomplete: wait for more */
+    CHECK(input_parse((const unsigned char *)seq, strlen(seq), false, &k) == 0);
+
+    Editor *e = editor_new(true);
+    Buffer *b = buffer_new("m");
+    editor_add_buffer(e, b);
+    Str s = {0};
+    for (int i = 0; i < 100; i++) str_appendf(&s, "line %d\n", i);
+    buffer_insert(b, 0, s.data, s.len);
+    str_free(&s);
+    b->cursor = 0;
+    int left = render_text_left(e); /* gutter */
+    mouse_at(e, 0, left + 2, 3, false);
+    CHECK(buffer_cur_line(b) == 3 && buffer_col_of(b, b->cursor) == 2);
+    mouse_at(e, 0, left + 4, 4, true); /* drag selects */
+    size_t rs, re;
+    CHECK(buffer_region(b, &rs, &re) && re - rs == 9 && b->shift_selection);
+    mouse_at(e, 0, 0, 0, false); /* click in gutter: column 0, deselect */
+    CHECK(b->cursor == 0 && !b->mark_active);
+    mouse_at(e, 65, left, 0, false); /* wheel down moves the cursor along */
+    CHECK(b->top == 3 && buffer_cur_line(b) == 3);
+    mouse_at(e, 64, left, 0, false);
+    CHECK(b->top == 0);
+    mouse_at(e, 0, left, e->rows - 1, false); /* message line: ignored */
+    CHECK(buffer_cur_line(b) == 3);
+    mouse_at(e, 0, left + 1, 0, true); /* drag not started in text */
+    CHECK(!b->mark_active);
+    mouse_at(e, 0, left, 1, false);
+    mouse_at(e, 0, left + 3, 1, true);
+    mouse_at(e, 2, left + 1, 1, false); /* right-click inside: keeps it */
+    CHECK(b->mark_active && !e->popup_active && e->popup == NULL);
+    mouse_at(e, 2, left + 2, 5, false); /* outside: moves, deselects */
+    CHECK(!b->mark_active && buffer_cur_line(b) == 5);
+    editor_free(e);
+}
+
 int main(void) {
     setlocale(LC_CTYPE, "C.UTF-8");
     snprintf(tmpdir, sizeof tmpdir, "/tmp/cedit-test-XXXXXX");
@@ -796,6 +878,8 @@ int main(void) {
     RUN(test_editor);
     RUN(test_nano_keys);
     RUN(test_special_buffers);
+    RUN(test_tree);
+    RUN(test_mouse);
     char cmd[300];
     snprintf(cmd, sizeof cmd, "rm -rf '%s'", tmpdir);
     if (system(cmd) != 0) fprintf(stderr, "warning: could not remove %s\n", tmpdir);

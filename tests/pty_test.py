@@ -231,6 +231,22 @@ s.send("y")
 code = s.wait()
 check("nano ^X then y saves and exits", code == 0 and read("nano2.txt") == b"dirtymore")
 
+# 9c. mouse: drag-select, right-click menu cut and paste
+s = Session("ctx.txt")
+s.send("hello world")
+s.send(C("a"))
+s.send("\x1b[<0;5;1M\x1b[<32;10;1M\x1b[<0;10;1m")  # drag over "hello"
+s.send("\x1b[<2;7;1M\x1b[<2;7;1m")                 # right-click inside
+check("context menu shown", b"Cut" in s.out and b"Paste" in s.out)
+s.send("\r")                                        # Cut (first item)
+s.send("\x1b[<2;40;1M\x1b[<2;40;1m")               # right-click line end
+s.send("\r")                                        # Paste (first item)
+s.send(C("x") + C("s"), 0.3)
+s.send(C("x") + C("c"))
+code = s.wait()
+check("context menu cut + paste", code == 0 and read("ctx.txt") == b" worldhello",
+      repr(read("ctx.txt")))
+
 # 10. language server (fake server; UTF-16 positions)
 FAKE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fake_lsp.py")
 os.makedirs(TMP + "/cfg/cedit", exist_ok=True)

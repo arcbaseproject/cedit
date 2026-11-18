@@ -179,8 +179,12 @@ static int gutter_width(const Editor *e, const Buffer *b) {
     return d + 1;
 }
 
+int render_text_left(Editor *e) {
+    return tree_width(e) + gutter_width(e, editor_buf(e));
+}
+
 static int text_width(const Editor *e, const Buffer *b) {
-    int w = e->cols - gutter_width(e, b);
+    int w = e->cols - tree_width(e) - gutter_width(e, b);
     return w < 1 ? 1 : w;
 }
 
@@ -376,6 +380,43 @@ static void render_status(Editor *e, Buffer *b, Str *row) {
     str_appendz(row, "\x1b[K");
 }
 
+static void render_tree_row(Editor *e, int r, Str *row) {
+    int w = tree_width(e) - 1, used = 0;
+    size_t idx = e->tree_top + (size_t)r;
+    if (idx < e->tree_n) {
+        const TreeEntry *t = &e->tree[idx];
+        const char *name = strrchr(t->path, '/');
+        name = name ? name + 1 : t->path;
+        style_sgr(e, idx != e->tree_sel ? (t->dir ? HL_TYPE : HL_NORMAL)
+                     : e->tree_focus   ? S_POPUP_SEL : S_SELECTION, row);
+        for (int i = 0; i < t->depth && used + 2 <= w; i++, used += 2)
+            str_appendz(row, "  ");
+        if (used + 2 <= w) {
+            str_appendz(row, !t->dir ? "  " : t->open ? "\xe2\x96\xbe " : "\xe2\x96\xb8 ");
+            used += 2;
+        }
+        size_t i = 0, len = strlen(name);
+        Glyph g;
+        while (i < len) { /* glyphs never carry control bytes */
+            glyph_next(name + i, len - i, (size_t)used, 1, &g);
+            if (used + g.width > w) break;
+            str_append(row, g.out, g.outlen);
+            used += g.width;
+            i += g.bytes;
+        }
+        if (t->dir && used < w) {
+            str_putc(row, '/');
+            used++;
+        }
+    } else {
+        style_sgr(e, HL_NORMAL, row);
+    }
+    for (; used < w; used++) str_putc(row, ' ');
+    style_sgr(e, S_FILLER, row);
+    str_appendz(row, "\xe2\x94\x82");
+    style_sgr(e, HL_NORMAL, row);
+}
+
 /* Message line; returns the cursor column when the minibuffer is active. */
 static size_t render_message(Editor *e, Str *row) {
     size_t cols = (size_t)e->cols, cursor_col = 0;
@@ -470,6 +511,11 @@ void render_frame(Editor *e) {
     str_clear(out);
     str_appendz(out, "\x1b[?2026h\x1b[?25l");
     if (full) str_appendz(out, "\x1b[0m\x1b[2J");
+    if (full || e->mouse_on != e->cfg.mouse) {
+        e->mouse_on = e->cfg.mouse;
+        str_appendz(out, e->mouse_on ? "\x1b[?1002h\x1b[?1006h"
+                                     : "\x1b[?1006l\x1b[?1002l");
+    }
 
     int trows = render_text_rows(e);
     size_t n = text_lines(&b->text), cur_line = buffer_cur_line(b);
@@ -481,7 +527,7 @@ void render_frame(Editor *e) {
         size_t al = text_line_of(&b->text, e->popup_anchor);
         int ar = (int)(al - b->top);
         size_t acol = buffer_col_of(b, e->popup_anchor);
-        int ac = gutter_width(e, b) + (acol >= b->left ? (int)(acol - b->left) : 0);
+        int ac = tree_width(e) + gutter_width(e, b) + (acol >= b->left ? (int)(acol - b->left) : 0);
         pop_h = (int)e->popup_n < 10 ? (int)e->popup_n : 10;
         for (size_t i = 0; i < e->popup_n; i++) {
             int w = (int)display_width(e->popup[i], strlen(e->popup[i]), 1) + 2;
@@ -500,9 +546,15 @@ void render_frame(Editor *e) {
         if (!text_box && e->popup_sel >= e->popup_top + (size_t)pop_h)
             e->popup_top = e->popup_sel - (size_t)pop_h + 1;
     }
+    if (tree_width(e)) tree_scroll(e, trows);
+    e->popup_r0 = pop_r0;
+    e->popup_h = pop_h;
+    e->popup_c = pop_c;
+    e->popup_w = pop_w;
     for (int r = 0; r < rows; r++) {
         str_clear(&row);
         if (r < trows) {
+            if (tree_width(e)) render_tree_row(e, r, &row);
             size_t line = b->top + (size_t)r;
             if (line < n) {
                 render_line(e, b, line, cur_line, &row);
@@ -556,7 +608,7 @@ void render_frame(Editor *e) {
         crow = (size_t)rows - 1;
     } else {
         crow = buffer_cur_line(b) - b->top;
-        ccol = (size_t)gutter_width(e, b) + buffer_col_of(b, b->cursor) - b->left;
+        ccol = (size_t)(tree_width(e) + gutter_width(e, b)) + buffer_col_of(b, b->cursor) - b->left;
     }
     if (ccol >= (size_t)e->cols) ccol = (size_t)e->cols - 1;
     str_appendf(out, "\x1b[%zu;%zuH\x1b[?25h\x1b[?2026l", crow + 1, ccol + 1);

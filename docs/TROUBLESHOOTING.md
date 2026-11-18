@@ -4,6 +4,10 @@
 xterm needs `XTerm*metaSendsEscape: true`. On macOS Terminal and iTerm2,
 enable "Use Option as Meta". Pressing Esc and then the key always works.
 
+**I can't select or copy text with the mouse.** Cedit captures the mouse
+by default. Hold Shift while you drag to use the terminal's own selection
+(Shift+middle-click pastes), or put `mouse no` in your config.
+
 **Ctrl+S freezes the terminal in another program.** That is XON/XOFF
 flow control (Ctrl+Q resumes it). Cedit turns flow control off while it
 runs, so Ctrl+S reaches the editor.

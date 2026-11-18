@@ -967,6 +967,22 @@ static void cmd_lsp_complete(Editor *e) {
             break;
         } else if (k == 7 || k == KEY_ESC) {
             break;
+        } else if (k == KEY_MOUSE && e->popup_r0 >= 0 &&
+                   e->mouse.y >= e->popup_r0 &&
+                   e->mouse.y < e->popup_r0 + e->popup_h &&
+                   e->mouse.x >= e->popup_c &&
+                   e->mouse.x < e->popup_c + e->popup_w) {
+            const Mouse *mo = &e->mouse;
+            size_t idx = e->popup_top + (size_t)(mo->y - e->popup_r0);
+            if (mo->button == 64) {
+                e->popup_sel = (e->popup_sel + nv - 1) % nv;
+            } else if (mo->button == 65) {
+                e->popup_sel = (e->popup_sel + 1) % nv;
+            } else if (mo->button == 0 && !mo->release && !mo->drag &&
+                       idx < nv) {
+                accept_item(e, &items[vis[idx]], ws);
+                break;
+            }
         } else if (k == KEY_DEL || k == 8) {
             if (b->cursor <= ws) break;
             buffer_delete(b, buffer_prev_char(b, b->cursor),

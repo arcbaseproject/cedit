@@ -20,6 +20,7 @@ typedef struct {
     int keymap;             /* KEYMAP_* */
     int colors;             /* -1 auto, else ColorMode */
     bool load_plugins;
+    bool mouse;             /* capture the mouse (Shift bypasses it) */
 } Config;
 
 void config_defaults(Config *c);

@@ -39,7 +39,15 @@ enum {
     KEY_PASTE_START,
     KEY_PASTE_END,
     KEY_RESIZE,     /* synthesized: screen needs a redraw (resize, LSP) */
+    KEY_MOUSE,      /* SGR mouse report; decode it with input_mouse */
 };
+
+/* One mouse report. x and y are 0-based screen cells. */
+typedef struct {
+    int button;     /* 0 left, 1 middle, 2 right, 64/65 wheel up/down */
+    int x, y;
+    bool release, drag;
+} Mouse;
 
 static inline Key key_base(Key k) { return k & ~KM_MASK; }
 
@@ -52,6 +60,10 @@ static inline Key key_base(Key k) { return k & ~KM_MASK; }
  */
 size_t input_parse(const unsigned char *buf, size_t len, bool final,
                    Key *key);
+
+/* Decodes the bytes input_parse consumed for a KEY_MOUSE. Returns false
+ * if they are not a valid SGR report. */
+bool input_mouse(const unsigned char *buf, size_t len, Mouse *m);
 
 /* "C-x", "M-<left>", "RET" ... Returns false on unknown syntax. */
 bool key_parse(const char *s, size_t n, Key *key);

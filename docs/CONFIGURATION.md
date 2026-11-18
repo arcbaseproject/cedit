@@ -18,6 +18,7 @@ running, for example `tab-width 2`.
 | `expand-tabs` | `yes`/`no` | `yes` |
 | `auto-indent` | `yes`/`no` | `yes` |
 | `auto-pair` | `yes`/`no` (closing brackets/quotes) | `yes` |
+| `mouse` | `yes`/`no` (cedit handles clicks; hold Shift for the terminal's own selection) | `yes` |
 | `line-numbers` | `off`, `absolute`, `relative` | `absolute` |
 | `theme` | `dark`, `light`, `mono` | `dark` |
 | `colors` | `auto`, `16`, `256`, `truecolor` | `auto` |

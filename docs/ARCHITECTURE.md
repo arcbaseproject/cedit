@@ -8,6 +8,8 @@ src/
                  buffer list, emergency save, recent files
   commands.c     command registry, default keymaps, movement/editing
   filecmds.c     file, buffer and misc commands, completion
+  mouse.c        mouse clicks, drag selection, wheel
+  tree.c         file tree sidebar: entries, keys (drawn by render.c)
   search.c       search engine + isearch / query-replace commands
   keymap.c       keymap tree (prefix maps), key sequence parsing
   buffer.c       document model: text + undo + file + view state

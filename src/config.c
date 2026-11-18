@@ -18,6 +18,7 @@ void config_defaults(Config *c) {
     c->keymap = KEYMAP_NANO;
     c->colors = -1;
     c->load_plugins = true;
+    c->mouse = true;
 }
 
 static int parse_bool(const char *s, bool *out) {
@@ -112,6 +113,9 @@ int config_apply_line(Editor *e, const char *line, char *err, size_t errlen) {
     } else if (!strcmp(k, "auto-pair")) {
         if (parse_bool(v, &bv)) goto badbool;
         e->cfg.auto_pair = bv;
+    } else if (!strcmp(k, "mouse")) {
+        if (parse_bool(v, &bv)) goto badbool;
+        e->cfg.mouse = bv;
     } else if (!strcmp(k, "plugins")) {
         if (parse_bool(v, &bv)) goto badbool;
         e->cfg.load_plugins = bv;

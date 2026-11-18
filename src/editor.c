@@ -43,6 +43,7 @@ void editor_free(Editor *e) {
     if (!e) return;
     lsp_shutdown(e);
     script_free(e);
+    tree_free(e);
     for (size_t i = 0; i < e->nbufs; i++) buffer_free(e->bufs[i]);
     free(e->bufs);
     keymap_free(e->keymap);
@@ -212,6 +213,8 @@ Key editor_read_key(Editor *e) {
                 }
                 n = input_parse(e->inbuf, e->inlen, true, &k);
             }
+            if (k == KEY_MOUSE && !input_mouse(e->inbuf, n, &e->mouse))
+                k = KEY_NONE;
             memmove(e->inbuf, e->inbuf + n, e->inlen - n);
             e->inlen -= n;
             if (k != KEY_NONE) return k;
@@ -278,6 +281,10 @@ static bool self_insertable(Key k) {
 
 void editor_handle_key(Editor *e, Key k) {
     if (k == KEY_NONE || k == KEY_RESIZE) return;
+    if (k == KEY_MOUSE) {
+        editor_mouse(e);
+        return;
+    }
     Buffer *b = editor_buf(e);
     if (k == KEY_PASTE_START) {
         e->pasting = true;

@@ -45,6 +45,8 @@ void render_invalidate(struct Editor *e);
 /* Adjust the current buffer's scroll so the cursor is visible. */
 void render_scroll(struct Editor *e);
 int render_text_rows(const struct Editor *e);
+/* Screen column where buffer text starts (after tree and gutter). */
+int render_text_left(struct Editor *e);
 void render_free(struct Editor *e);
 
 #endif

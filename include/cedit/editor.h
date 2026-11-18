@@ -14,6 +14,7 @@
 #include "cedit/render.h"
 #include "cedit/search.h"
 #include "cedit/terminal.h"
+#include "cedit/tree.h"
 #include "cedit/util.h"
 
 typedef struct Editor Editor;
@@ -82,6 +83,17 @@ struct Editor {
     char **popup;           /* sanitized display lines */
     size_t popup_n, popup_sel, popup_top;
     size_t popup_anchor;    /* buffer offset the popup is attached to */
+    int popup_r0, popup_h, popup_c, popup_w; /* last drawn box; r0 -1: none */
+
+    /* mouse (mouse.c) */
+    Mouse mouse;            /* last report, set with KEY_MOUSE */
+    bool mouse_on;          /* reporting enabled on the terminal */
+    bool mouse_text_press;  /* left button went down in the text */
+
+    /* file tree sidebar (tree.c) */
+    bool tree_visible, tree_focus;
+    TreeEntry *tree;
+    size_t tree_n, tree_sel, tree_top;
 
     void *lsp;              /* language server state (lsp.c) */
     double last_input;      /* monotonic time of the last key */
@@ -108,6 +120,9 @@ Key editor_read_key(Editor *e);
 void editor_handle_key(Editor *e, Key k);
 void editor_run_command(Editor *e, const Command *c, bool shifted);
 void editor_run(Editor *e);
+/* Act on e->mouse: place the cursor, select by dragging, scroll, click
+ * the file tree. */
+void editor_mouse(Editor *e);
 
 /* Modal minibuffer prompt. Returns malloc'd text or NULL if cancelled. */
 char *editor_prompt(Editor *e, const char *prompt, const char *initial,

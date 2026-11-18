@@ -114,7 +114,9 @@ static size_t parse_csi(const unsigned char *buf, size_t len, bool final,
     unsigned char f = buf[i];
     long mod = np >= 2 ? params[1] : 0;
     Key k = KEY_NONE;
-    if (private_marker) {
+    if (buf[2] == '<' && (f == 'M' || f == 'm')) {
+        k = KEY_MOUSE;
+    } else if (private_marker) {
         k = KEY_NONE;
     } else if (letter_key(f) != KEY_NONE) {
         k = apply_mods(letter_key(f), mod);
@@ -160,6 +162,23 @@ size_t input_parse(const unsigned char *buf, size_t len, bool final,
     if (n == 0) return 0;
     *key = k == KEY_NONE ? KEY_NONE : k | KM_ALT;
     return n + 1;
+}
+
+bool input_mouse(const unsigned char *buf, size_t len, Mouse *m) {
+    char s[CSI_MAX + 1], fin;
+    int b, x, y;
+    if (len > CSI_MAX) return false;
+    memcpy(s, buf, len);
+    s[len] = '\0';
+    if (sscanf(s, "\x1b[<%d;%d;%d%c", &b, &x, &y, &fin) != 4 || x < 1 ||
+        y < 1)
+        return false;
+    m->button = b & ~(4 | 8 | 16 | 32); /* drop shift/alt/ctrl/motion bits */
+    m->drag = (b & 32) != 0;
+    m->release = fin == 'm';
+    m->x = x - 1;
+    m->y = y - 1;
+    return true;
 }
 
 static const struct {

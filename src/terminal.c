@@ -21,7 +21,8 @@ static int sig_pipe[2] = {-1, -1};
 static bool atexit_registered;
 
 static const char enter_seq[] = "\x1b[?1049h\x1b[?2004h\x1b[H\x1b[2J";
-static const char leave_seq[] = "\x1b[?2004l\x1b[0m\x1b[?25h\x1b[?1049l";
+/* mouse reporting is switched on by render.c, off here */
+static const char leave_seq[] = "\x1b[?1006l\x1b[?1002l\x1b[?2004l\x1b[0m\x1b[?25h\x1b[?1049l";
 
 static void write_all_raw(int fd, const char *s, size_t n) {
     while (n) {
