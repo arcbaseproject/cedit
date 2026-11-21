@@ -52,6 +52,18 @@ resort, `kill <pid>` from another terminal triggers the emergency save.
 restores the terminal on normal exit, on termination signals and on
 fatal signals, but cannot after `SIGKILL`.
 
+**Zoom (`Ctrl +` / `Ctrl -`) does nothing.** Font size belongs to the
+terminal, not Cedit. Most terminals bind these keys already. xterm uses
+`Shift` + keypad `+`/`-` by default; to get `Ctrl +`/`Ctrl -`, add this to
+`~/.Xresources`, run `xrdb -merge ~/.Xresources` and open a new xterm:
+
+```
+XTerm.vt100.translations: #override \n\
+    Ctrl <Key> minus: smaller-vt-font() \n\
+    Ctrl <Key> plus: larger-vt-font() \n\
+    Ctrl <Key> equal: larger-vt-font()
+```
+
 **Debug builds.** Run `make asan` and reproduce the problem with
 `build/asan/cedit`. Sanitizer reports go to stderr; redirect them with
 `2>asan.log`.

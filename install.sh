@@ -7,6 +7,7 @@
 #   --prefix DIR        install under DIR (default: ~/.local, or /usr/local as root)
 #   --lua               build with Lua scripting
 #   --no-auto-update    do not install the daily update timer
+#   --no-deps           do not install missing build tools and clangd
 #   --check-update      update only if the VERSION on GitHub differs (used by the timer)
 #   --uninstall         remove cedit, the updater and the timer
 #   --quiet             print errors only (log goes to the update log)
@@ -14,6 +15,7 @@
 # A new version is installed only if it builds and its unit tests pass.
 # Auto-update runs `cedit-update --check-update` once a day: it downloads
 # VERSION from raw.githubusercontent.com and rebuilds when it changed.
+# `cedit update` runs the same check by hand.
 set -eu
 
 REPO="arcbaseproject/cedit"
@@ -24,6 +26,7 @@ TARBALL="https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz"
 if [ "$(id -u)" -eq 0 ]; then PREFIX="/usr/local"; else PREFIX="$HOME/.local"; fi
 LUA=0
 AUTO_UPDATE=1
+DEPS=1
 MODE=install
 QUIET=0
 
@@ -33,10 +36,11 @@ while [ $# -gt 0 ]; do
         --prefix=*) PREFIX="${1#--prefix=}" ;;
         --lua) LUA=1 ;;
         --no-auto-update) AUTO_UPDATE=0 ;;
+        --no-deps) DEPS=0 ;;
         --check-update) MODE=check ;;
         --uninstall) MODE=uninstall ;;
         --quiet) QUIET=1 ;;
-        -h|--help) sed -n '2,17p' "$0" 2>/dev/null || true; exit 0 ;;
+        -h|--help) sed -n '2,19p' "$0" 2>/dev/null || true; exit 0 ;;
         *) echo "install.sh: unknown option $1" >&2; exit 2 ;;
     esac
     shift
@@ -61,6 +65,40 @@ fetch() { # fetch URL [OUTFILE]
     else
         die "need curl or wget"
     fi
+}
+
+# ---- dependencies ----
+
+# Build tools plus clangd, which gives C/C++ completion. Other language
+# servers are optional; cedit starts them when it finds them.
+install_deps() {
+    missing=0
+    for t in make tar clangd; do command -v "$t" >/dev/null 2>&1 || missing=1; done
+    command -v cc >/dev/null 2>&1 || command -v gcc >/dev/null 2>&1 ||
+        command -v clang >/dev/null 2>&1 || missing=1
+    command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || missing=1
+    [ "$missing" -eq 1 ] || return 0
+    SUDO=""
+    if [ "$(id -u)" -ne 0 ]; then
+        command -v sudo >/dev/null 2>&1 || { say "Skipping dependencies: no sudo"; return 0; }
+        SUDO=sudo
+    fi
+    if command -v apt-get >/dev/null 2>&1; then
+        $SUDO apt-get update && $SUDO apt-get install -y build-essential tar curl clangd
+    elif command -v dnf >/dev/null 2>&1; then
+        $SUDO dnf install -y gcc make tar curl clang-tools-extra
+    elif command -v pacman >/dev/null 2>&1; then
+        $SUDO pacman -S --needed --noconfirm base-devel tar curl clang
+    elif command -v xbps-install >/dev/null 2>&1; then
+        $SUDO xbps-install -Sy gcc make tar curl clang-tools-extra
+    elif command -v apk >/dev/null 2>&1; then
+        $SUDO apk add build-base tar curl clang-extra-tools
+    elif command -v zypper >/dev/null 2>&1; then
+        $SUDO zypper install -y gcc make tar curl clang-tools
+    else
+        say "Unknown package manager: install make, a C compiler and clangd yourself"
+        return 0
+    fi || say "Dependency install failed; continuing"
 }
 
 installed_version() {
@@ -139,7 +177,7 @@ fi
 
 mkdir -p "$STATE"
 if [ "$MODE" = check ]; then
-    exec >>"$LOG" 2>&1
+    [ "$QUIET" -eq 1 ] && exec >>"$LOG" 2>&1
     echo "== $(date '+%Y-%m-%d %H:%M:%S') update check"
     remote="$(fetch "$RAW/VERSION")" || die "cannot fetch $RAW/VERSION"
     remote="$(printf '%s' "$remote" | tr -d ' \r\n')"
@@ -153,6 +191,9 @@ if [ "$MODE" = check ]; then
 fi
 
 # ---- build and install ----
+
+# never in check mode: the timer runs unattended and cannot answer sudo
+[ "$MODE" = install ] && [ "$DEPS" -eq 1 ] && install_deps
 
 for tool in make tar; do
     command -v "$tool" >/dev/null 2>&1 || die "need $tool"

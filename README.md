@@ -61,7 +61,8 @@ The name is a working title.
 curl -fsSL https://raw.githubusercontent.com/arcbaseproject/cedit/main/install.sh | sh
 ```
 
-The script downloads the source, builds it, runs the unit tests and
+The script installs missing build tools and clangd (C/C++ completion)
+with your package manager, downloads the source, builds it, runs the unit tests and
 installs `cedit` to `~/.local/bin` (or `/usr/local/bin` when you run it
 as root). It also sets up a daily systemd timer, or a cron job if you
 lack systemd, that compares your version with
@@ -73,11 +74,12 @@ version replaces yours after it builds and passes its tests.
 | `--prefix DIR` | install somewhere else |
 | `--lua` | build with Lua scripting |
 | `--no-auto-update` | skip the timer |
+| `--no-deps` | do not install build tools or clangd |
 | `--uninstall` | remove cedit, `cedit-update` and the timer |
 
 Pass options after `sh -s --`, for example
 `curl -fsSL .../install.sh | sh -s -- --no-auto-update`. Run
-`cedit-update --check-update` to update by hand; the log lives in
+`cedit update` (or `cedit --update`) to update by hand; the timer's log lives in
 `~/.local/state/cedit/update.log`.
 
 Auto-update runs whatever lands on the `main` branch of this repository.

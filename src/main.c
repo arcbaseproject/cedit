@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "cedit/editor.h"
 #include "cedit/script.h"
@@ -20,7 +21,8 @@ static void usage(FILE *out) {
           "  -n, --no-config    ignore the configuration file\n"
           "      --no-plugins   do not load Lua plugins\n"
           "  -h, --help         show this help\n"
-          "  -V, --version      show version information\n\n"
+          "  -V, --version      show version information\n"
+          "      --update       check for and install a new version (also: cedit update)\n\n"
           "Default (nano-style) keys: ^O save, ^X exit, ^G help.\n",
           out);
 }
@@ -34,7 +36,31 @@ static void ensure_utf8_ctype(void) {
     }
 }
 
+/* `cedit update`: run the cedit-update script installed next to us. */
+static int run_update(void) {
+    char exe[4096], prefix[4200], script[4200];
+    ssize_t n = readlink("/proc/self/exe", exe, sizeof exe - 1);
+    const char *lua = script_available() ? "--lua" : NULL;
+    if (n > 0) {
+        exe[n] = '\0';
+        char *slash = strrchr(exe, '/');
+        *slash = '\0';
+        snprintf(script, sizeof script, "%s/cedit-update", exe);
+        snprintf(prefix, sizeof prefix, "%s/..", exe);
+        execl(script, "cedit-update", "--check-update", "--prefix", prefix,
+              lua, (char *)NULL);
+    }
+    /* no /proc (macOS) or no script beside the binary: try PATH */
+    execlp("cedit-update", "cedit-update", "--check-update", lua, (char *)NULL);
+    fprintf(stderr, "cedit: cannot run cedit-update: %s\n"
+                    "Installed from a package? Update with your package manager.\n",
+            strerror(errno));
+    return 1;
+}
+
 int main(int argc, char **argv) {
+    if (argc == 2 && (!strcmp(argv[1], "update") || !strcmp(argv[1], "--update")))
+        return run_update();
     int keymap = -1;
     bool no_config = false, no_plugins = false;
     int first_file = argc;
