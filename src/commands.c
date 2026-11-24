@@ -329,7 +329,8 @@ static char pair_closer(Buffer *b, Key k) {
     case '(': return ')';
     case '[': return ']';
     case '{': return '}';
-    case '"': case '\'': case '`':
+    case '"': return '"';
+    case '\'': case '`':
         return syntax_quote_pairs(b->syntax, (char)k) ? (char)k : 0;
     default: return 0;
     }
@@ -671,6 +672,10 @@ static void cmd_keyboard_quit(Editor *e) {
     editor_message(e, "Quit");
 }
 
+static void cmd_toggle_cursor_shape(Editor *e) {
+    e->bar_cursor = !e->bar_cursor;
+}
+
 static void cmd_ignore(Editor *e) { (void)e; }
 
 void commands_register_edit(Editor *e) {
@@ -714,6 +719,7 @@ void commands_register_edit(Editor *e) {
         {"undo", cmd_undo, 0, "Undo the last change"},
         {"redo", cmd_redo, 0, "Redo the last undone change"},
         {"keyboard-quit", cmd_keyboard_quit, 0, "Cancel selection, prefix or search highlight"},
+        {"toggle-cursor-shape", cmd_toggle_cursor_shape, 0, "Switch between block and bar cursors"},
         {"ignore", cmd_ignore, 0, "Do nothing (for unbinding keys)"},
     };
     for (size_t i = 0; i < sizeof t / sizeof t[0]; i++)
@@ -748,6 +754,7 @@ static const char *const common_keys[][2] = {
     {"RET", "newline"},                {"TAB", "indent"},
     {"<backtab>", "dedent"},           {"DEL", "delete-backward-char"},
     {"C-h", "delete-backward-char"},   {"<delete>", "delete-char"},
+    {"<insert>", "toggle-cursor-shape"}, {"M-i", "toggle-cursor-shape"},
     {"M-x", "execute-extended-command"},
     {"M-/", "lsp-complete"},           {"M-TAB", "lsp-complete"},
     {"M-.", "lsp-definition"},         {"M-,", "lsp-back"},

@@ -118,6 +118,8 @@ static size_t parse_csi(const unsigned char *buf, size_t len, bool final,
         k = KEY_MOUSE;
     } else if (private_marker) {
         k = KEY_NONE;
+    } else if (i == 3 && buf[2] == '4' && f == 'h') {
+        k = KEY_INSERT; /* st outside application keypad mode */
     } else if (letter_key(f) != KEY_NONE) {
         k = apply_mods(letter_key(f), mod);
     } else if (f == 'Z') {

@@ -136,6 +136,7 @@ static void test_input(void) {
     CHECK(parse1("\x1b[A", false, &n) == KEY_UP && n == 3);
     CHECK(parse1("\x1b[1;5C", false, &n) == (KEY_RIGHT | KM_CTRL) && n == 6);
     CHECK(parse1("\x1b[1;2D", false, &n) == (KEY_LEFT | KM_SHIFT));
+    CHECK(parse1("\x1b[4h", false, &n) == KEY_INSERT && n == 4);
     CHECK(parse1("\x1b[3~", false, &n) == KEY_DELETE && n == 4);
     CHECK(parse1("\x1b[5~", false, &n) == KEY_PGUP);
     CHECK(parse1("\x1bOH", false, &n) == KEY_HOME);
@@ -396,6 +397,18 @@ static void hl(const char *lang, const char *line, uint8_t state_in,
 
 static void test_syntax(void) {
     uint8_t h[128], st;
+    CHECK_STR(syntax_name(syntax_detect("main.goose", NULL, 0)), "Goose");
+    hl("Goose", "var n: u8 = 42; // count", 0, h, &st);
+    CHECK(h[0] == HL_KEYWORD && h[7] == HL_TYPE && h[12] == HL_NUMBER &&
+          h[16] == HL_COMMENT && st == 0);
+    hl("Goose", "/* outer /* inner", 0, h, &st);
+    hl("Goose", "// */ still */ fn", st, h, &st);
+    CHECK(h[6] == HL_COMMENT && h[15] == HL_KEYWORD && st == 0);
+    hl("Goose", "\"\"\"", 0, h, &st);
+    hl("Goose", "raw // text", st, h, &st);
+    CHECK(h[8] == HL_STRING && st != 0);
+    hl("Goose", "\"\"\"; 'x'", st, h, &st);
+    CHECK(h[2] == HL_STRING && h[3] == HL_OPERATOR && h[6] == HL_STRING && st == 0);
     hl("C", "int x = 42; // hi", 0, h, &st);
     CHECK(h[0] == HL_TYPE && h[8] == HL_NUMBER && h[12] == HL_COMMENT && st == 0);
     hl("C", "return \"a\\\"b\";", 0, h, &st);
@@ -525,6 +538,14 @@ static void test_editor(void) {
 
     /* auto-pairing */
     {
+        type(e, "\"");
+        s = contents(e);
+        CHECK_STR(s, "\"\"");
+        CHECK(b->cursor == 1);
+        free(s);
+        editor_handle_key(e, KEY_DEL);
+        CHECK(buffer_len(b) == 0);
+
         Buffer *t = buffer_new("t.py");
         t->syntax = syntax_by_name("Python");
         editor_init_buffer(e, t);

@@ -135,7 +135,7 @@ static void complete_recent(Editor *e, Str *text) {
 }
 
 static void complete_syntax(Editor *e, Str *text) {
-    static char *names[] = {"C", "C++", "Rust", "Go", "Python", "Shell",
+    static char *names[] = {"C", "C++", "Rust", "Go", "Goose", "Python", "Shell",
                             "JavaScript", "JSON", "TOML", "Markdown",
                             "Makefile", "Text"};
     complete_list(e, text, text->len, names, sizeof names / sizeof names[0]);

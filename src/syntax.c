@@ -15,6 +15,7 @@ enum {
     F_SHELLVAR = 1 << 8,  /* $var ${var} */
     F_QUOTE_ML = 1 << 9,  /* quoted strings may span lines (shell) */
     F_SQ_RAW = 1 << 10,   /* no escapes in single quotes (shell) */
+    F_NESTED_COMMENT = 1 << 11, /* nested block comments */
 };
 
 enum {
@@ -26,6 +27,7 @@ enum {
     ST_DQ,
     ST_SQ,
     ST_FENCE,
+    ST_NESTED_COMMENT, /* this value and higher encode nesting depth */
 };
 
 typedef uint8_t (*HighlightFn)(const Syntax *s, const char *line, size_t len,
@@ -176,6 +178,31 @@ static uint8_t generic(const Syntax *s, const char *line, size_t len,
         unsigned char c = (unsigned char)line[i];
         bool prev_sep = i == 0 || !is_ident((unsigned char)line[i - 1]);
 
+        if ((s->flags & F_NESTED_COMMENT) &&
+            (state >= ST_NESTED_COMMENT || starts_with(line, len, i, "/*"))) {
+            size_t start = i;
+            if (state < ST_NESTED_COMMENT) {
+                state = ST_NESTED_COMMENT;
+                i += 2;
+            }
+            while (i < len) {
+                if (starts_with(line, len, i, "*/")) {
+                    i += 2;
+                    if (state == ST_NESTED_COMMENT) {
+                        state = ST_NONE;
+                        break;
+                    }
+                    state--;
+                } else if (starts_with(line, len, i, "/*")) {
+                    if (state < UINT8_MAX) state++;
+                    i += 2;
+                } else {
+                    i++;
+                }
+            }
+            mark(hl, start, i, HL_COMMENT);
+            continue;
+        }
         if ((starts_with(line, len, i, s->lc1) ||
              starts_with(line, len, i, s->lc2)) &&
             (!(s->flags & F_COMMENT_WS) || i == 0 ||
@@ -194,8 +221,9 @@ static uint8_t generic(const Syntax *s, const char *line, size_t len,
             i = e;
             continue;
         }
-        if ((s->flags & F_TRIPLE) && (starts_with(line, len, i, "\"\"\"") ||
-                                      starts_with(line, len, i, "'''"))) {
+        if ((s->flags & F_TRIPLE) &&
+            (starts_with(line, len, i, "\"\"\"") ||
+             ((s->flags & F_SQ) && starts_with(line, len, i, "'''")))) {
             const char *q = c == '"' ? "\"\"\"" : "'''";
             size_t e = find(line, len, i + 3, q);
             if (e == SIZE_MAX) {
@@ -278,7 +306,7 @@ static uint8_t generic(const Syntax *s, const char *line, size_t len,
         if (is_operator(c)) mark(hl, i, i + 1, HL_OPERATOR);
         i++;
     }
-    return ST_NONE;
+    return state;
 }
 
 /* ---- Markdown ---- */
@@ -512,6 +540,18 @@ static const Syntax languages[] = {
                    "uint32", "uint64", "uintptr", "any"),
      .lc1 = "//", .bc_start = "/*", .bc_end = "*/",
      .flags = F_DQ | F_CHAR | F_BACKTICK},
+    {.name = "Goose",
+     .match = LIST(".goose"),
+     .keywords = LIST("as", "block", "break", "const", "continue", "defer",
+                      "else", "enum", "export", "extern", "false", "fn", "for",
+                      "guard", "if", "import", "in", "let", "loop", "match",
+                      "namespace", "null", "pad", "recursive", "return",
+                      "reusable", "self", "simd", "struct", "thread_fn",
+                      "true", "type", "var", "while"),
+     .types = LIST("bool", "varint", "i8", "i16", "i32", "i64", "u8", "u16",
+                   "u32", "u64", "f32", "f64"),
+     .lc1 = "//",
+     .flags = F_DQ | F_CHAR | F_TRIPLE | F_NESTED_COMMENT},
     {.name = "Python",
      .match = LIST(".py", ".pyw", ".pyi", "SConstruct", "SConscript"),
      .shebang = LIST("python"),
@@ -580,7 +620,7 @@ static const Syntax languages[] = {
 const char *syntax_name(const Syntax *s) { return s ? s->name : "Text"; }
 
 const char *syntax_names(void) {
-    return "C, C++, Rust, Go, Python, Shell, JavaScript, JSON, TOML, "
+    return "C, C++, Rust, Go, Goose, Python, Shell, JavaScript, JSON, TOML, "
            "Markdown, Makefile";
 }
 

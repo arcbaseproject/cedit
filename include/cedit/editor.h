@@ -72,6 +72,7 @@ struct Editor {
     size_t inlen;
 
     /* renderer cache */
+    bool bar_cursor;
     Str *rows_prev;
     int rows_prev_n;
     Str frame;

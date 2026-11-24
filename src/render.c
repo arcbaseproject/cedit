@@ -611,6 +611,7 @@ void render_frame(Editor *e) {
         ccol = (size_t)(tree_width(e) + gutter_width(e, b)) + buffer_col_of(b, b->cursor) - b->left;
     }
     if (ccol >= (size_t)e->cols) ccol = (size_t)e->cols - 1;
+    str_appendz(out, e->bar_cursor ? "\x1b[6 q" : "\x1b[2 q");
     str_appendf(out, "\x1b[%zu;%zuH\x1b[?25h\x1b[?2026l", crow + 1, ccol + 1);
     if (!e->headless) term_write(out->data, out->len);
 }

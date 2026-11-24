@@ -73,6 +73,7 @@ changes, the same as in nano.
 | `TAB` / `S-TAB` | `indent` / `dedent` (region-aware) |
 | `DEL`, `C-h` | `delete-backward-char` |
 | `<delete>` | `delete-char` |
+| `<insert>` or `M-i` | `toggle-cursor-shape` (block or vertical bar) |
 | `M-x` | `execute-extended-command` |
 | `M-/`, `M-TAB` | `lsp-complete` |
 | `M-.` / `M-,` | `lsp-definition` / `lsp-back` |
@@ -189,10 +190,10 @@ mouse handling off.
 ## Auto-pairing
 
 Typing `(`, `[` or `{` inserts the closing bracket too, when the next
-character is a space, the end of the line or another closer. Quotes pair
-the same way in languages that use them for strings (`"` in most, `'` in
-Python/Shell/JavaScript/TOML, `` ` `` in Go/JavaScript), but not right
-after a word character (`don't`). Typing a closer right before an
+character is a space, the end of the line or another closer. Double quotes pair the same
+way in every buffer. Single quotes and backticks pair in languages that
+use them for strings. Quotes do not pair right after a word character
+(`don't`). Typing a closer right before an
 identical one steps over it. Backspace inside an empty pair deletes both
 characters. With a selection, an opener wraps the selection. Turn it off
 with `auto-pair no`.

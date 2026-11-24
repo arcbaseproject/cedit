@@ -1,4 +1,4 @@
-.TH CEDIT 1 "November 2026" "cedit 1.1.0" "User Commands"
+.TH CEDIT 1 "November 2026" "cedit 1.2.0" "User Commands"
 .SH NAME
 cedit \- lightweight Emacs-inspired terminal text editor
 .SH SYNOPSIS
@@ -134,7 +134,7 @@ sequences in files and filenames are displayed as visible text and never
 sent to the terminal.
 .SH LANGUAGE SERVERS
 When a file is opened, the matching language server (clangd,
-rust-analyzer, gopls, pylsp, bash-language-server,
+rust-analyzer, gopls, goose lsp, pylsp, bash-language-server,
 typescript-language-server, vscode-json-language-server, taplo, marksman)
 is started if it is installed. Servers are run without a shell. Some
 servers execute project code (rust-analyzer runs build scripts); use

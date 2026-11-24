@@ -43,7 +43,7 @@ The name is a working title.
   underlined errors, a completion popup, go-to-definition and hover.
   Cedit also starts rust-analyzer, gopls, pylsp, bash-language-server,
   typescript-language-server, taplo and marksman when it finds them.
-- **Syntax highlighting** for C, C++, Rust, Go, Python, Shell,
+- **Syntax highlighting** for C, C++, Rust, Go, Goose, Python, Shell,
   JavaScript, JSON, TOML, Markdown and Makefiles.
 - **Editing tools.** Undo and redo, selections, incremental and regex
   search, query-replace, auto-indent, bracket and quote pairing, several

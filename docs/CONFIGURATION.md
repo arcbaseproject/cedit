@@ -50,6 +50,7 @@ markers.
 | C, C++ | `clangd` |
 | Rust | `rust-analyzer` |
 | Go | `gopls` |
+| Goose | `goose lsp` |
 | Python | `pylsp`, `pyright-langserver --stdio`, `basedpyright-langserver --stdio` |
 | Shell | `bash-language-server start` |
 | JavaScript | `typescript-language-server --stdio` |

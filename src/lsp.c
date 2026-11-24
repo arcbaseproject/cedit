@@ -83,6 +83,7 @@ static const struct {
     {"C++", "cpp", {"clangd", NULL}},
     {"Rust", "rust", {"rust-analyzer", NULL}},
     {"Go", "go", {"gopls", NULL}},
+    {"Goose", "goose", {"goose", "lsp", NULL}},
     {"Python", "python", {"pylsp", NULL}},
     {"Python", "python", {"pyright-langserver", "--stdio", NULL}},
     {"Python", "python", {"basedpyright-langserver", "--stdio", NULL}},

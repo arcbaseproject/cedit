@@ -101,6 +101,20 @@ check("save new file and quit", code == 0 and read("new.txt") == b"hello world\n
       f"code={code} data={read('new.txt') if os.path.exists(path('new.txt')) else None}")
 check("terminal restored (alt screen left)", b"\x1b[?1049l" in s.out)
 
+# Insert and Alt+i share the same cursor toggle on every keymap.
+for mode in ("--nano", "--simple", "--emacs"):
+    s = Session(mode)
+    check(f"{mode} starts with block cursor", b"\x1b[2 q" in s.out)
+    s.out = b""
+    s.send("\x1b[2~")
+    check(f"{mode} Insert selects bar cursor", b"\x1b[6 q" in s.out)
+    s.out = b""
+    s.send("\x1bi")
+    check(f"{mode} Alt+i restores block cursor", b"\x1b[2 q" in s.out)
+    quit_keys = {"--nano": C("x"), "--simple": C("q"), "--emacs": C("x") + C("c")}
+    s.send(quit_keys[mode])
+    check(f"{mode} restores terminal cursor", s.wait() == 0 and b"\x1b[0 q" in s.out)
+
 # 2. CRLF preserved
 with open(path("dos.txt"), "wb") as f:
     f.write(b"one\r\ntwo\r\n")

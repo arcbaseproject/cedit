@@ -22,7 +22,7 @@ static bool atexit_registered;
 
 static const char enter_seq[] = "\x1b[?1049h\x1b[?2004h\x1b[H\x1b[2J";
 /* mouse reporting is switched on by render.c, off here */
-static const char leave_seq[] = "\x1b[?1006l\x1b[?1002l\x1b[?2004l\x1b[0m\x1b[?25h\x1b[?1049l";
+static const char leave_seq[] = "\x1b[?1006l\x1b[?1002l\x1b[?2004l\x1b[0m\x1b[?25h\x1b[?1049l\x1b[0 q";
 
 static void write_all_raw(int fd, const char *s, size_t n) {
     while (n) {
