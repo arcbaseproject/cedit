@@ -1,5 +1,5 @@
 Name:           cedit
-Version:        1.1.0
+Version:        1.2.0
 Release:        1%{?dist}
 Summary:        Small terminal text editor with nano keys and language-server support
 License:        GPL-3.0-or-later
@@ -12,7 +12,7 @@ BuildRequires:  make
 %description
 Cedit is a terminal text editor written in C. It uses nano keys by
 default and offers Emacs and Ctrl+S/Ctrl+Q key layouts. It handles large
-files, saves atomically, highlights eleven languages and talks to
+files, saves atomically, highlights twelve languages and talks to
 language servers for diagnostics and completion.
 
 %prep
@@ -35,6 +35,9 @@ make test
 %{_pkgdocdir}/
 
 %changelog
+* Mon Nov 23 2026 arcbaseproject - 1.2.0-1
+- Add Goose support and cursor shape toggle
+
 * Tue Nov 17 2026 arcbaseproject - 1.1.0-1
 - Update to 1.1.0: file tree, mouse support, right-click menu
 

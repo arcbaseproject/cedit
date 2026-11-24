@@ -6,13 +6,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "cedit";
-  version = "1.1.0";
+  version = "1.2.0";
 
   src = fetchFromGitHub {
     owner = "arcbaseproject";
     repo = "cedit";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-p5T4oFh4dEtmr6y0WiAsZsFxPIb3p0xuZDFj0ukprmA=";
+    hash = "sha256-tnQQDBc2a6oYhmFCzN838tJ4MsbfIsz0+L0BcbSuy/o=";
   };
 
   makeFlags = [ "PREFIX=${placeholder "out"}" ];

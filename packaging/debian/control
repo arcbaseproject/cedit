@@ -16,5 +16,5 @@ Suggests: clangd
 Description: small terminal text editor with nano keys
  Cedit is a terminal text editor written in C. It uses nano keys by
  default and offers Emacs and Ctrl+S/Ctrl+Q key layouts. It handles
- large files, saves atomically, highlights eleven languages and talks
+ large files, saves atomically, highlights twelve languages and talks
  to language servers for diagnostics and completion.

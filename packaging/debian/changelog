@@ -1,3 +1,9 @@
+cedit (1.2.0-1) unstable; urgency=medium
+
+  * New upstream release with Goose support and a cursor shape toggle.
+
+ -- arcbaseproject <arcbaseproject@users.noreply.github.com>  Mon, 23 Nov 2026 20:00:00 -0600
+
 cedit (1.1.0-1) unstable; urgency=medium
 
   * New upstream release: file tree, mouse support, right-click menu.
