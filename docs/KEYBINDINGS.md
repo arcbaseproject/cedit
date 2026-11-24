@@ -103,7 +103,8 @@ Any other key returns focus to the text and runs as usual.
 | wheel | scroll three lines; the cursor stays on screen |
 | click in the file tree | open the file, or fold/unfold the folder |
 | click / wheel on the completion popup | accept an item / move the selection |
-| right-click | menu: Cut and Copy (on a selection), Paste, Select all, Undo |
+| right-click in the file tree | create a file or folder inside the clicked folder, beside a file, or at the root on a blank row. On an entry, also rename or delete it. Deleting a folder asks for confirmation and removes its contents. |
+| right-click in the text | menu: Cut and Copy (on a selection), Paste, Select all, Undo |
 
 In the right-click menu, click an item or use up/down and `RET`; `Esc`
 or a click elsewhere closes it. Right-clicking outside the selection
@@ -190,8 +191,8 @@ mouse handling off.
 ## Auto-pairing
 
 Typing `(`, `[` or `{` inserts the closing bracket too, when the next
-character is a space, the end of the line or another closer. Double quotes pair the same
-way in every buffer. Single quotes and backticks pair in languages that
+character is a space, the end of the line or another closer. Single and double quotes
+pair the same way in every buffer. Backticks pair in languages that
 use them for strings. Quotes do not pair right after a word character
 (`don't`). Typing a closer right before an
 identical one steps over it. Backspace inside an empty pair deletes both

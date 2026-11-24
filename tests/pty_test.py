@@ -25,10 +25,10 @@ failures = 0
 
 
 class Session:
-    def __init__(self, *args, rows=24, cols=80):
+    def __init__(self, *args, rows=24, cols=80, cwd=TMP):
         self.pid, self.fd = pty.fork()
         if self.pid == 0:
-            os.chdir(TMP)
+            os.chdir(cwd)
             if "--simple" not in args and "--nano" not in args:
                 args = ("--emacs", *args)  # most cases drive Emacs keys
             args = tuple(a for a in args if a != "--nano")
@@ -260,6 +260,49 @@ s.send(C("x") + C("c"))
 code = s.wait()
 check("context menu cut + paste", code == 0 and read("ctx.txt") == b" worldhello",
       repr(read("ctx.txt")))
+
+# Explorer context menu, including actions on blank rows and open files.
+workspace = path("explorer")
+os.mkdir(workspace)
+s = Session(cwd=workspace)
+s.send("\x1bt")
+
+
+def tree_click(button, row):
+    s.send(f"\x1b[<{button};4;{row}M\x1b[<{button};4;{row}m")
+
+
+tree_click(2, 6)
+check("empty explorer menu", b"Create folder" in s.out and b"Rename" not in s.out)
+tree_click(0, 8)
+s.send("project\r")
+folder = os.path.join(workspace, "project")
+check("create folder from blank row", os.path.isdir(folder))
+tree_click(2, 1)
+check("entry explorer menu", b"Rename" in s.out and b"Delete" in s.out)
+tree_click(0, 2)
+s.send("notes\r")
+check("create file inside folder", os.path.isfile(os.path.join(folder, "notes")))
+tree_click(0, 2)
+s.send("draft")
+tree_click(2, 2)
+tree_click(0, 5)
+s.send(".txt\r")
+s.send(C("x") + C("s"))
+check("save open file after rename", read("explorer/project/notes.txt") == b"draft"
+      and not os.path.exists(os.path.join(folder, "notes")))
+tree_click(2, 1)
+tree_click(0, 5)
+s.send("n")
+check("cancel folder deletion", os.path.isdir(folder))
+os.symlink(TMP, os.path.join(folder, ".outside"))
+tree_click(2, 1)
+tree_click(0, 5)
+s.send("y")
+check("delete folder and contents", not os.path.exists(folder))
+check("folder deletion preserves symlink target", os.path.isfile(path("ctx.txt")))
+s.send(C("x") + C("c"))
+check("exit after explorer actions", s.wait() == 0)
 
 # 10. language server (fake server; UTF-16 positions)
 FAKE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fake_lsp.py")

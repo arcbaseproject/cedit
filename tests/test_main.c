@@ -546,6 +546,14 @@ static void test_editor(void) {
         editor_handle_key(e, KEY_DEL);
         CHECK(buffer_len(b) == 0);
 
+        type(e, "'");
+        s = contents(e);
+        CHECK_STR(s, "''");
+        CHECK(b->cursor == 1);
+        free(s);
+        editor_handle_key(e, KEY_DEL);
+        CHECK(buffer_len(b) == 0);
+
         Buffer *t = buffer_new("t.py");
         t->syntax = syntax_by_name("Python");
         editor_init_buffer(e, t);

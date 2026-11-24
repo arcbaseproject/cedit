@@ -6,22 +6,6 @@
 
 #define WHEEL_LINES 3
 
-static void tree_mouse(Editor *e, const Mouse *m, int rows) {
-    if (m->button == 64 || m->button == 65) { /* scroll; the selection follows */
-        size_t r = (size_t)rows, *top = &e->tree_top;
-        size_t max = e->tree_n > r ? e->tree_n - r : 0;
-        if (m->button == 64) *top = *top > WHEEL_LINES ? *top - WHEEL_LINES : 0;
-        else *top = *top + WHEEL_LINES < max ? *top + WHEEL_LINES : max;
-        if (e->tree_sel < *top) e->tree_sel = *top;
-        if (e->tree_sel >= *top + r) e->tree_sel = *top + r - 1;
-        return;
-    }
-    size_t idx = e->tree_top + (size_t)m->y;
-    if (m->button != 0 || m->release || m->drag || idx >= e->tree_n) return;
-    e->tree_sel = idx;
-    tree_key(e, KEY_RET); /* open the file or fold/unfold the folder */
-}
-
 static void text_wheel(Buffer *b, bool up, int rows) {
     size_t n = text_lines(&b->text), r = (size_t)rows;
     if (up) b->top = b->top > WHEEL_LINES ? b->top - WHEEL_LINES : 0;
@@ -40,31 +24,14 @@ static bool in_popup(const Editor *e, const Mouse *m) {
            m->x < e->popup_c + e->popup_w;
 }
 
-/* Right-click menu at pos, drawn with the completion popup. */
-static void context_menu(Editor *e, size_t pos) {
-    static const char *const items[][2] = {
-        {"Cut", "kill-region"},   {"Copy", "copy-region"},
-        {"Paste", "yank"},        {"Select all", "mark-whole-buffer"},
-        {"Undo", "undo"},
-    };
-    Buffer *b = editor_buf(e);
-    size_t rs, re;
-    bool sel = buffer_region(b, &rs, &re) && pos >= rs && pos <= re;
-    if (!sel) { /* clicked outside the selection: move there, like a click */
-        b->mark_active = false;
-        b->cursor = pos;
-        b->goal_valid = false;
-    }
-    size_t first = sel ? 0 : 2; /* Cut and Copy need a selection */
-    size_t n = sizeof items / sizeof items[0] - first;
+static size_t choose_item(Editor *e, const char *const *labels, size_t n) {
     e->popup = xcalloc(n, sizeof *e->popup);
-    for (size_t i = 0; i < n; i++) e->popup[i] = xstrdup(items[first + i][0]);
+    for (size_t i = 0; i < n; i++) e->popup[i] = xstrdup(labels[i]);
     e->popup_n = n;
     e->popup_sel = e->popup_top = 0;
-    e->popup_anchor = pos;
     e->popup_active = true;
 
-    const char *cmd = NULL;
+    size_t choice = SIZE_MAX;
     Key pending = KEY_NONE;
     while (!e->headless) {
         render_frame(e);
@@ -76,7 +43,7 @@ static void context_menu(Editor *e, size_t pos) {
         } else if (k == KEY_UP || k == 16) {
             e->popup_sel = (e->popup_sel + n - 1) % n;
         } else if (k == KEY_RET) {
-            cmd = items[first + e->popup_sel][1];
+            choice = e->popup_sel;
             break;
         } else if (k == KEY_MOUSE && (m->release || m->drag)) {
             continue; /* e.g. the release of the right click itself */
@@ -87,7 +54,7 @@ static void context_menu(Editor *e, size_t pos) {
             } else if (m->button == 65) {
                 e->popup_sel = (e->popup_sel + 1) % n;
             } else if (idx < n) {
-                cmd = items[first + idx][1];
+                choice = idx;
                 break;
             }
         } else {
@@ -100,8 +67,58 @@ static void context_menu(Editor *e, size_t pos) {
     e->popup = NULL;
     e->popup_n = e->popup_sel = 0;
     e->popup_active = false;
-    if (cmd) editor_run_command(e, command_find(e, cmd), false);
+    e->popup_at_mouse = false;
     if (pending != KEY_NONE) editor_handle_key(e, pending);
+    return choice;
+}
+
+/* Right-click menu at pos, drawn with the completion popup. */
+static void context_menu(Editor *e, size_t pos) {
+    static const char *const labels[] = {"Cut", "Copy", "Paste", "Select all", "Undo"};
+    static const char *const commands[] = {
+        "kill-region", "copy-region", "yank", "mark-whole-buffer", "undo"
+    };
+    Buffer *b = editor_buf(e);
+    size_t rs, re;
+    bool sel = buffer_region(b, &rs, &re) && pos >= rs && pos <= re;
+    if (!sel) { /* clicked outside the selection: move there, like a click */
+        b->mark_active = false;
+        b->cursor = pos;
+        b->goal_valid = false;
+    }
+    size_t first = sel ? 0 : 2; /* Cut and Copy need a selection */
+    e->popup_anchor = pos;
+    size_t choice = choose_item(e, labels + first, sizeof labels / sizeof *labels - first);
+    if (choice != SIZE_MAX)
+        editor_run_command(e, command_find(e, commands[first + choice]), false);
+}
+
+static void tree_mouse(Editor *e, const Mouse *m, int rows) {
+    if (m->button == 64 || m->button == 65) { /* scroll; the selection follows */
+        size_t r = (size_t)rows, *top = &e->tree_top;
+        size_t max = e->tree_n > r ? e->tree_n - r : 0;
+        if (m->button == 64) *top = *top > WHEEL_LINES ? *top - WHEEL_LINES : 0;
+        else *top = *top + WHEEL_LINES < max ? *top + WHEEL_LINES : max;
+        if (e->tree_sel < *top) e->tree_sel = *top;
+        if (e->tree_sel >= *top + r) e->tree_sel = *top + r - 1;
+        return;
+    }
+    size_t idx = e->tree_top + (size_t)m->y;
+    if (m->button == 2 && !m->release && !m->drag) {
+        static const char *const labels[] = {"Create file", "Create folder", "Rename", "Delete"};
+        bool entry = idx < e->tree_n;
+        if (entry) e->tree_sel = idx;
+        e->popup_at_mouse = true;
+        e->popup_x = m->x;
+        e->popup_y = m->y;
+        size_t choice = choose_item(e, labels, entry ? 4 : 2);
+        if (choice != SIZE_MAX)
+            tree_action(e, entry ? idx : SIZE_MAX, (TreeAction)choice);
+        return;
+    }
+    if (m->button != 0 || m->release || m->drag || idx >= e->tree_n) return;
+    e->tree_sel = idx;
+    tree_key(e, KEY_RET); /* open the file or fold/unfold the folder */
 }
 
 void editor_mouse(Editor *e) {

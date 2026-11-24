@@ -25,6 +25,9 @@ typedef struct {
     bool dir, open;
 } TreeEntry;
 
+typedef enum { TREE_CREATE_FILE, TREE_CREATE_FOLDER, TREE_RENAME, TREE_DELETE } TreeAction;
+void tree_action(struct Editor *e, size_t idx, TreeAction action);
+
 void tree_register_commands(struct Editor *e);
 void tree_free(struct Editor *e);
 /* (Re)list the entries of dir as the top level. */

@@ -524,10 +524,13 @@ void render_frame(Editor *e) {
     /* completion popup geometry */
     int pop_r0 = -1, pop_h = 0, pop_c = 0, pop_w = 0;
     if (e->popup_active && e->popup_n) {
-        size_t al = text_line_of(&b->text, e->popup_anchor);
-        int ar = (int)(al - b->top);
-        size_t acol = buffer_col_of(b, e->popup_anchor);
-        int ac = tree_width(e) + gutter_width(e, b) + (acol >= b->left ? (int)(acol - b->left) : 0);
+        int ar = e->popup_y, ac = e->popup_x;
+        if (!e->popup_at_mouse) {
+            size_t al = text_line_of(&b->text, e->popup_anchor);
+            ar = (int)(al - b->top);
+            size_t acol = buffer_col_of(b, e->popup_anchor);
+            ac = tree_width(e) + gutter_width(e, b) + (acol >= b->left ? (int)(acol - b->left) : 0);
+        }
         pop_h = (int)e->popup_n < 10 ? (int)e->popup_n : 10;
         for (size_t i = 0; i < e->popup_n; i++) {
             int w = (int)display_width(e->popup[i], strlen(e->popup[i]), 1) + 2;

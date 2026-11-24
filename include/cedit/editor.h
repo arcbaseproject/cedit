@@ -80,7 +80,8 @@ struct Editor {
     size_t hl_scratch_cap;
 
     /* completion popup */
-    bool popup_active;
+    bool popup_active, popup_at_mouse;
+    int popup_x, popup_y;
     char **popup;           /* sanitized display lines */
     size_t popup_n, popup_sel, popup_top;
     size_t popup_anchor;    /* buffer offset the popup is attached to */
@@ -93,6 +94,7 @@ struct Editor {
 
     /* file tree sidebar (tree.c) */
     bool tree_visible, tree_focus;
+    char *tree_root;
     TreeEntry *tree;
     size_t tree_n, tree_sel, tree_top;
 

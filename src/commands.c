@@ -330,7 +330,8 @@ static char pair_closer(Buffer *b, Key k) {
     case '[': return ']';
     case '{': return '}';
     case '"': return '"';
-    case '\'': case '`':
+    case '\'': return '\'';
+    case '`':
         return syntax_quote_pairs(b->syntax, (char)k) ? (char)k : 0;
     default: return 0;
     }
